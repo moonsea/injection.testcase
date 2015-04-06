@@ -1,0 +1,4 @@
+Run: 
+	python2.7 sqlmap.py -h
+	OR
+	./sqlmap.py -h

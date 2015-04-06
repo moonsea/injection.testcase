@@ -1,0 +1,1 @@
+http://192.168.75.128/sqli/example1.php?name=root (GET)
