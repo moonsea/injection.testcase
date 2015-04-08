@@ -79,33 +79,6 @@ def main():
         #According to the input parameters, set the configure of the software
         #### Generate testcase
 
-        """
-        print "-------------------------  kb ------------------------------------"
-        kb_info_file = open("kb_info_file_before","w+")
-        for key in kb.keys():
-            print >> kb_info_file, key,"-------",kb[key]
-        print "------------------------------------------------------------------"
-        
-        conf_info_file = open("conf_info_file_before","w+")
-        print "-----------------------  conf ----------------------------------"
-        for key  in conf.keys():
-            print >> conf_info_file, key,"------",conf[key]
-        conf_info_file.close()
-        print "------------------------------------------------------------------"
-        """
-
-        ### --profile profile ## get the dot picture
-        ### --live_test  ##
-        """
-        if conf.profile:
-            profile()
-        elif conf.smokeTest:
-            smokeTest()
-        elif conf.liveTest:
-            liveTest()
-        else:
-            start()
-        """
         start()
 
     except SqlmapUserQuitException:
@@ -163,30 +136,6 @@ def main():
         kb.threadContinue = False
         kb.threadException = True
 
-        if conf.get("hashDB"):
-            try:
-                conf.hashDB.flush(True)
-            except KeyboardInterrupt:
-                pass
-
-        if cmdLineOptions.get("sqlmapShell"):
-            cmdLineOptions.clear()
-            conf.clear()
-            kb.clear()
-            main()
-
-        if hasattr(conf, "api"):
-            try:
-                conf.database_cursor.disconnect()
-            except KeyboardInterrupt:
-                pass
-
-        if conf.get("dumper"):
-            conf.dumper.flush()
-
-        # Reference: http://stackoverflow.com/questions/1635080/terminate-a-multi-thread-python-program
-        if conf.get("threads", 0) > 1 or conf.get("dnsServer"):
-            os._exit(0)
-
+ 
 if __name__ == "__main__":
     main()
