@@ -60,6 +60,7 @@ def main():
     Main function of sqlmap when running from command line.
     """
     try:
+        """
         paths.SQLMAP_ROOT_PATH = modulePath()#Get current path of sqlmap.py
         setPaths()
 
@@ -67,6 +68,7 @@ def main():
         cmdLineOptions.update(cmdLineParser().__dict__)
 
         initOptions(cmdLineOptions)
+        """
 
         banner()
         #Show the banner of the software
@@ -75,9 +77,11 @@ def main():
         dataToStdout("[!] freedom disclaimer: %s\n\n" % LEGAL_DISCLAIMER, forceOutput=True)
         dataToStdout("[*] starting at %s\n\n" % time.strftime("%X"), forceOutput=True)
 
+        """
         init()
         #According to the input parameters, set the configure of the software
         #### Generate testcase
+        """
 
         start()
 
