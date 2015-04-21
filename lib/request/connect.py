@@ -639,17 +639,13 @@ class Connect(object):
 
         raise404 = place != PLACE.URI if raise404 is None else raise404
 
-        # print "-------------------------  value ---------------------------"
-        # print value
-        # print "----------------------------------------------------------"
-        value = agent.adjustLateValues(value)### replace sleep time
-        
+        value = agent.adjustLateValues(value)
+        """
         print "-------------------------  value ---------------------------"
         print value
         print "----------------------------------------------------------"
-        
+        """
         payload = agent.extractPayload(value)
-        print "payload:",payload
         """
         payload_file = open("payload_file","a")
         print "------------------  Payload -------------------------"

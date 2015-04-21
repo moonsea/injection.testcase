@@ -12,24 +12,23 @@ from lib.core.settings import EXCLUDE_UNESCAPE
 
 class Unescaper(AttribDict):
     def escape(self, expression, quote=True, dbms=None):
-        # if conf.noEscape:
-        #     return expression
+        if conf.noEscape:
+            return expression
 
-        # if expression is None:
-        #     return expression
+        if expression is None:
+            return expression
 
-        # for exclude in EXCLUDE_UNESCAPE:
-        #     if exclude in expression:
-        #         return expression
+        for exclude in EXCLUDE_UNESCAPE:
+            if exclude in expression:
+                return expression
 
-        # identifiedDbms = Backend.getIdentifiedDbms()
+        identifiedDbms = Backend.getIdentifiedDbms()
 
-        # if dbms is not None:
-        #     return self[dbms](expression, quote=quote)
-        # elif identifiedDbms is not None:
-        #     return self[identifiedDbms](expression, quote=quote)
-        # else:
-        #     return expression
-        return expression
+        if dbms is not None:
+            return self[dbms](expression, quote=quote)
+        elif identifiedDbms is not None:
+            return self[identifiedDbms](expression, quote=quote)
+        else:
+            return expression
 
 unescaper = Unescaper()

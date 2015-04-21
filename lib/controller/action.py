@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+"""
+Copyright (c) 2006-2014 sqlmap developers (http://sqlmap.org/)
+See the file 'doc/COPYING' for copying permission
+"""
+
 from lib.controller.handler import setHandler
 from lib.core.common import Backend
 from lib.core.common import Format

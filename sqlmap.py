@@ -39,27 +39,116 @@ from lib.core.exception import SqlmapSilentQuitException
 from lib.core.exception import SqlmapUserQuitException
 from lib.core.option import initOptions
 from lib.core.option import init
+from lib.core.profiling import profile
 from lib.core.settings import LEGAL_DISCLAIMER
+from lib.core.testing import smokeTest
+from lib.core.testing import liveTest
 from lib.parse.cmdline import cmdLineParser
+#from lib.utils.api import setRestAPILog
+#from lib.utils.api import StdDbOut
+
+def modulePath():
+    """
+    This will get us the program's directory, even if we are frozen
+    using py2exe
+    """
+
+    try:
+        _ = sys.executable if weAreFrozen() else __file__
+    except NameError:
+        _ = inspect.getsourcefile(modulePath)
+
+    '''
+    print "_:"
+    print _
+    print "__file__:"
+    print __file__
+    print "real path:"
+    print getUnicode(_,sys.getfilesystemencoding())
+    print sys.getfilesystemencoding()
+    print os.path.realpath(getUnicode(_,sys.getfilesystemencoding()))
+    print "------------------------------------------------"
+    '''
+
+    return os.path.dirname(os.path.realpath(getUnicode(_, sys.getfilesystemencoding())))
 
 def main():
     """
     Main function of sqlmap when running from command line.
     """
+
+    """"
+    print " "
+    print "-------------------------------------------------------------------"
+    print "------------Just Test conf -------------------------------------------------"
+    for i in conf :
+        print i
+    print conf
+    print "-------------------------------------------------------------------"
+    """
+
     try:
-    
+        paths.SQLMAP_ROOT_PATH = modulePath()#Get current path of sqlmap.py
+        setPaths()
+
+        # Store original command line options for possible later restoration
+        cmdLineOptions.update(cmdLineParser().__dict__)
+
+        """
+        ###Get the options from cmdline command
+        print "-----------------------------------------------------------------"
+        print "---------------------  cmdLineOptions ---------------------------"
+        print cmdLineOptions
+        print "----------------------------------------------------------------"
+        for i in cmdLineOptions.keys() :
+            print i,"---------",cmdLineOptions[i]
+        print "-----------------------------------------------------------------"
+        """
+
+        initOptions(cmdLineOptions)
+
+        """
+        if hasattr(conf, "api"):
+            # Overwrite system standard output and standard error to write
+            # to an IPC database
+            sys.stdout = StdDbOut(conf.taskid, messagetype="stdout")
+            sys.stderr = StdDbOut(conf.taskid, messagetype="stderr")
+            setRestAPILog()
+        """
+
         banner()
         #Show the banner of the software
 
         conf.showTime = True
-        dataToStdout("[!] freedom disclaimer: %s\n\n" % LEGAL_DISCLAIMER, forceOutput=True)
+        dataToStdout("[!] legal disclaimer: %s\n\n" % LEGAL_DISCLAIMER, forceOutput=True)
         dataToStdout("[*] starting at %s\n\n" % time.strftime("%X"), forceOutput=True)
 
+        init()
+        #According to the input parameters, set the configure of the software
 
-        # testcase_file = open("testcase_file","a")
-        # print "--------------  Generate Testcase ------------------------"
+        if conf.profile:
+            profile()
+        elif conf.smokeTest:
+            smokeTest()
+        elif conf.liveTest:
+            liveTest()
+        else:
+        
+            """
+            print "-------------------------  kb ------------------------------------"
+            kb_info_file = open("kb_info_file","w+")
+            for key in kb.keys():
+                print >> kb_info_file, key,"-------",kb[key]
+            print "------------------------------------------------------------------"
 
-        start()
+            info_file = open("conf_info_file.txt","w+")
+            print "-----------------------  conf ----------------------------------"
+            for key  in conf.keys():
+                print >> info_file, key,"------",conf[key]
+            info_file.close()
+            print "------------------------------------------------------------------"
+            """
+            start()
 
     except SqlmapUserQuitException:
         errMsg = "user quit"
@@ -110,7 +199,36 @@ def main():
         createGithubIssue(errMsg, excMsg)
 
     finally:
-        dataToStdout("\n[*] shutting down at %s\n\n" % time.strftime("%X"), forceOutput=True)
- 
+        if conf.get("showTime"):
+            dataToStdout("\n[*] shutting down at %s\n\n" % time.strftime("%X"), forceOutput=True)
+
+        kb.threadContinue = False
+        kb.threadException = True
+
+        if conf.get("hashDB"):
+            try:
+                conf.hashDB.flush(True)
+            except KeyboardInterrupt:
+                pass
+
+        if cmdLineOptions.get("sqlmapShell"):
+            cmdLineOptions.clear()
+            conf.clear()
+            kb.clear()
+            main()
+
+        if hasattr(conf, "api"):
+            try:
+                conf.database_cursor.disconnect()
+            except KeyboardInterrupt:
+                pass
+
+        if conf.get("dumper"):
+            conf.dumper.flush()
+
+        # Reference: http://stackoverflow.com/questions/1635080/terminate-a-multi-thread-python-program
+        if conf.get("threads", 0) > 1 or conf.get("dnsServer"):
+            os._exit(0)
+
 if __name__ == "__main__":
     main()

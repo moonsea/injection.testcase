@@ -96,8 +96,6 @@ def _setRequestParams():
     if conf.data is not None:
         conf.method = HTTPMETHOD.POST if not conf.method or conf.method == HTTPMETHOD.GET else conf.method
 
-        # print "hahahaha"
-
         def process(match, repl):
             retVal = match.group(0)
 
@@ -209,7 +207,6 @@ def _setRequestParams():
 
     kb.processUserMarks = True if (kb.postHint and CUSTOM_INJECTION_MARK_CHAR in conf.data) else kb.processUserMarks
 
-    ###URI_INJECTABLE_REGEX = r"//[^/]*/([^\.*?]+)\Z"
     if re.search(URI_INJECTABLE_REGEX, conf.url, re.I) and not any(place in conf.parameters for place in (PLACE.GET, PLACE.POST)) and not kb.postHint and not CUSTOM_INJECTION_MARK_CHAR in (conf.data or ""):
         warnMsg = "you've provided target URL without any GET "
         warnMsg += "parameters (e.g. www.site.com/article.php?id=1) "
@@ -228,11 +225,7 @@ def _setRequestParams():
             raise SqlmapUserQuitException
 
     for place, value in ((PLACE.URI, conf.url), (PLACE.CUSTOM_POST, conf.data), (PLACE.CUSTOM_HEADER, str(conf.httpHeaders))):
-        ###PROBLEMATIC_CUSTOM_INJECTION_PATTERNS = r"(;q=[^;']+)|(\*/\*)"
-        #print "value -------------",value
         _ = re.sub(PROBLEMATIC_CUSTOM_INJECTION_PATTERNS, "", value or "") if place == PLACE.CUSTOM_HEADER else value or ""
-        #print "_ ---------------",_
-        # print place
         if CUSTOM_INJECTION_MARK_CHAR in _:
             if kb.processUserMarks is None:
                 lut = {PLACE.URI: '-u', PLACE.CUSTOM_POST: '--data', PLACE.CUSTOM_HEADER: '--headers/--user-agent/--referer/--cookie'}
@@ -514,7 +507,6 @@ def _createFilesDir():
     Create the file directory.
     """
 
-    ### --file-read
     if not conf.rFile:
         return
 
@@ -625,9 +617,9 @@ def _createTargetDirs():
 
         raise SqlmapMissingPrivileges(errMsg)
 
-    _createDumpDir()#### create dump directory
-    _createFilesDir()### --file-read ## read file from db 
-    _configureDumper()### set up log file
+    _createDumpDir()
+    _createFilesDir()
+    _configureDumper()
 
 def _restoreMergedOptions():
     """
@@ -635,8 +627,6 @@ def _restoreMergedOptions():
     that could be possibly changed during the testing of previous target.
     """
 
-    ### RESTORE_MERGED_OPTIONS = ("col", "db", "dnsName", "privEsc", "tbl", "regexp", "string", "textOnly", "threads", "timeSec", "tmpPath", "uChar", "user")
-    ### mergedOptions is also a dict
     for option in RESTORE_MERGED_OPTIONS:
         conf[option] = mergedOptions[option]
 
@@ -645,15 +635,10 @@ def initTargetEnv():
     Initialize target environment.
     """
 
-    # print "------------------------  mergedOptions ------------------------"
-    # print mergedOptions
-    # print "--------------------------------------------------------------"
-
     if conf.multipleTargets:
         if conf.hashDB:
             conf.hashDB.close()
 
-        #### cookiejar
         if conf.cj:
             resetCookieJar(conf.cj)
 
@@ -661,17 +646,16 @@ def initTargetEnv():
         conf.parameters = {}
         conf.hashDBFile = None
 
-        _setKnowledgeBaseAttributes(False)####set kb
-        _restoreMergedOptions()#### restore options
-        _setDBMS()####  --dbms  ## forcing back-end DBMS to user defined value
+        _setKnowledgeBaseAttributes(False)
+        _restoreMergedOptions()
+        _setDBMS()
 
-    ### --data ### data string to be send through post
     if conf.data:
         class _(unicode):
             pass
 
         for key, value in conf.httpHeaders:
-            if key.upper() == HTTP_HEADER.CONTENT_TYPE.upper():#### CONTENT_TYPE = "Content-Type"
+            if key.upper() == HTTP_HEADER.CONTENT_TYPE.upper():
                 kb.postUrlEncode = "urlencoded" in value
                 break
         if kb.postUrlEncode:
@@ -681,9 +665,9 @@ def initTargetEnv():
             kb.postSpaceToPlus = '+' in original
 
 def setupTargetEnv():
-    _createTargetDirs()### create output file, --file-read folder, output log file
-    _setRequestParams()### set up parameters
-    _setHashDB()### Check and set the HashDB SQLite file for query resume functionality.
-    _resumeHashDBValues()###    Resume stored data values from HashDB
-    _setResultsFile()###Create results file for storing results of running in a multiple target mode.
-    _setAuthCred()###    Adds authentication credentials (if any) for current target to the password manager
+    _createTargetDirs()
+    _setRequestParams()
+    _setHashDB()
+    _resumeHashDBValues()
+    _setResultsFile()
+    _setAuthCred()

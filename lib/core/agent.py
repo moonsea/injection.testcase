@@ -5,8 +5,6 @@ Copyright (c) 2006-2014 sqlmap developers (http://sqlmap.org/)
 See the file 'doc/COPYING' for copying permission
 """
 
-import inspect
-
 import re
 
 from lib.core.common import Backend
@@ -72,77 +70,72 @@ class Agent(object):
         This method replaces the affected parameter with the SQL
         injection statement to request
         """
-        # payload = agent.payload(place, parameter, value, getUnicode(randInt))
-
 
         #### Connect the Database Directly
-        # if conf.direct:
-        #     return self.payloadDirect(newValue)
-        paramDict = {'#1*': u'http://192.168.75.128:80/sqli/example1.php?name=root*'}
+        if conf.direct:
+            return self.payloadDirect(newValue)
 
         retVal = ""
 
-        # if where is None and isTechniqueAvailable(kb.technique):
-        #     where = kb.injection.data[kb.technique].where
+        # print "kb.technique -----------",kb.technique
+        if where is None and isTechniqueAvailable(kb.technique):
+            where = kb.injection.data[kb.technique].where
+        # print "where ----------------",where
 
-        # if kb.injection.place is not None:
-        #     place = kb.injection.place
+        if kb.injection.place is not None:
+            place = kb.injection.place
+        # print "place ----------------",place
 
-        # if kb.injection.parameter is not None:
-        #     parameter = kb.injection.parameter
+        if kb.injection.parameter is not None:
+            parameter = kb.injection.parameter
+        # print "parameter ---------------",parameter
 
-        # paramString = conf.parameters[place]### None at the beginning
-        # paramDict = conf.paramDict[place]### {} at the beginning
+        paramString = conf.parameters[place]### None at the beginning
+        paramDict = conf.paramDict[place]### {} at the beginning
         origValue = paramDict[parameter]###  { } at the beginning
-        # place = "URI"
+
+       #    print "paramstring ----------------------",paramString
+       #    print "paramDict ------------------------",paramDict
+       #    print "origValue --------------------------",origValue
 
         if place == PLACE.URI:
             paramString = origValue
-    
-            # print "----------------  OrigValue ---------------------------"
-            # print origValue
-            # print "----------------------------------------------------------"
-
+            """
+            print "----------------  OrigValue ---------------------------"
+            print origValue
+            print "----------------------------------------------------------"
+            """
             origValue = origValue.split(CUSTOM_INJECTION_MARK_CHAR)[0]####  "*"
-            # print origValue
-            origValue = origValue[origValue.rfind('/') + 1:]###### find from right
-            # print origValue
+            #print origValue
+            origValue = origValue[origValue.rfind('/') + 1:]
+            #print origValue
             for char in ('?', '=', ':'):
                 if char in origValue:
                     origValue = origValue[origValue.rfind(char) + 1:]
-            # print origValue
-            # print "------------------------------------------------------------"
+            #print origValue
+            #print "------------------------------------------------------------"
             
-        # elif place == PLACE.CUSTOM_POST:
-        #     paramString = origValue
-        #     origValue = origValue.split(CUSTOM_INJECTION_MARK_CHAR)[0]
-        #     if kb.postHint in (POST_HINT.SOAP, POST_HINT.XML):
-        #         origValue = origValue.split('>')[-1]
-        #     elif kb.postHint in (POST_HINT.JSON, POST_HINT.JSON_LIKE):
-        #         origValue = extractRegexResult(r"(?s)\"\s*:\s*(?P<result>\d+\Z)", origValue) or extractRegexResult(r'(?s)\s*(?P<result>[^"\[,]+\Z)', origValue)
-        #     else:
-        #         _ = extractRegexResult(r"(?s)(?P<result>[^\s<>{}();'\"&]+\Z)", origValue) or ""
-        #         origValue = _.split('=', 1)[1] if '=' in _ else ""
-        # elif place == PLACE.CUSTOM_HEADER:
-        #     paramString = origValue
-        #     origValue = origValue.split(CUSTOM_INJECTION_MARK_CHAR)[0]
-        #     origValue = origValue[origValue.index(',') + 1:]
-        #     match = re.search(r"([^;]+)=(?P<value>[^;]+);?\Z", origValue)
-        #     if match:
-        #         origValue = match.group("value")
+        elif place == PLACE.CUSTOM_POST:
+            paramString = origValue
+            origValue = origValue.split(CUSTOM_INJECTION_MARK_CHAR)[0]
+            if kb.postHint in (POST_HINT.SOAP, POST_HINT.XML):
+                origValue = origValue.split('>')[-1]
+            elif kb.postHint in (POST_HINT.JSON, POST_HINT.JSON_LIKE):
+                origValue = extractRegexResult(r"(?s)\"\s*:\s*(?P<result>\d+\Z)", origValue) or extractRegexResult(r'(?s)\s*(?P<result>[^"\[,]+\Z)', origValue)
+            else:
+                _ = extractRegexResult(r"(?s)(?P<result>[^\s<>{}();'\"&]+\Z)", origValue) or ""
+                origValue = _.split('=', 1)[1] if '=' in _ else ""
+        elif place == PLACE.CUSTOM_HEADER:
+            paramString = origValue
+            origValue = origValue.split(CUSTOM_INJECTION_MARK_CHAR)[0]
+            origValue = origValue[origValue.index(',') + 1:]
+            match = re.search(r"([^;]+)=(?P<value>[^;]+);?\Z", origValue)
+            if match:
+                origValue = match.group("value")
 
-        # if conf.prefix:
-        #     value = origValue
-        value = origValue
+        if conf.prefix:
+            value = origValue
 
-        print "value:",value
-        # print "origvalue:",origValue
-        """
-        class WHERE:
-            ORIGINAL = 1
-            NEGATIVE = 2
-            REPLACE = 3
-        """
         if value is None:
             if where == PAYLOAD.WHERE.ORIGINAL:
                 value = origValue
@@ -168,15 +161,15 @@ class Agent(object):
 
             newValue = "%s%s" % (value, newValue)
 
-        # print "newValue",newValue
         newValue = self.cleanupPayload(newValue, origValue)
-        # print "newValue",newValue
 
         if place in (PLACE.URI, PLACE.CUSTOM_POST, PLACE.CUSTOM_HEADER):
             _ = "%s%s" % (origValue, CUSTOM_INJECTION_MARK_CHAR)
-            if not isNumber(newValue) and not '"%s"' % _ in paramString:
+            #   print "kb.posthint ---------------",kb.postHint
+            #   print "POST_HINT.JSON ------------",POST_HINT.JSON
+            if kb.postHint == POST_HINT.JSON and not isNumber(newValue) and not '"%s"' % _ in paramString:
                 newValue = '"%s"' % newValue
-            elif not isNumber(newValue) and not "'%s'" % _ in paramString:
+            elif kb.postHint == POST_HINT.JSON_LIKE and not isNumber(newValue) and not "'%s'" % _ in paramString:
                 newValue = "'%s'" % newValue
             newValue = newValue.replace(CUSTOM_INJECTION_MARK_CHAR, REPLACEMENT_MARKER)
             retVal = paramString.replace(_, self.addPayloadDelimiters(newValue))
@@ -190,12 +183,6 @@ class Agent(object):
                 retVal = re.sub(r"(\A|\b)%s=%s(\Z|%s|%s|\s)" % (re.escape(parameter), re.escape(origValue), DEFAULT_GET_POST_DELIMITER, DEFAULT_COOKIE_DELIMITER), "%s=%s\g<2>" % (parameter, self.addPayloadDelimiters(newValue.replace("\\", "\\\\"))), paramString)
             if retVal == paramString and urlencode(parameter) != parameter:
                 retVal = re.sub(r"(\A|\b)%s=%s" % (re.escape(urlencode(parameter)), re.escape(origValue)), "%s=%s" % (urlencode(parameter), self.addPayloadDelimiters(newValue.replace("\\", "\\\\"))), paramString)
-
-        print "retVal----------------",retVal
-        # retVal = self.replacePayload(retVal,retVal)
-        retVal = self.removePayloadDelimiters(retVal)
-        print "retVal after ------------",retVal
-
 
         return retVal
 
@@ -216,37 +203,36 @@ class Agent(object):
         identified as valid
         """
 
-        # if conf.direct:
-        #     return self.payloadDirect(expression)
+        if conf.direct:
+            return self.payloadDirect(expression)
 
         expression = self.cleanupPayload(expression)
         expression = unescaper.escape(expression)
         query = None
 
-        # if where is None and kb.technique and kb.technique in kb.injection.data:
-        #     where = kb.injection.data[kb.technique].where
+        if where is None and kb.technique and kb.technique in kb.injection.data:
+            where = kb.injection.data[kb.technique].where
 
-        # If we are replacing (<where>) the param eter original value with
+        # If we are replacing (<where>) the parameter original value with
         # our payload do not prepend with the prefix
         if where == PAYLOAD.WHERE.REPLACE and not conf.prefix:
             query = ""
 
         # If the technique is stacked queries (<stype>) do not put a space
         # after the prefix or it is in GROUP BY / ORDER BY (<clause>)
-        # elif kb.technique == PAYLOAD.TECHNIQUE.STACKED:
-        #     query = kb.injection.prefix
-        # elif kb.injection.clause == [2, 3] or kb.injection.clause == [2] or kb.injection.clause == [3]:
-        #     query = kb.injection.prefix
-        # elif clause == [2, 3] or clause == [2] or clause == [3]:
-        #     query = prefix
+        elif kb.technique == PAYLOAD.TECHNIQUE.STACKED:
+            query = kb.injection.prefix
+        elif kb.injection.clause == [2, 3] or kb.injection.clause == [2] or kb.injection.clause == [3]:
+            query = kb.injection.prefix
+        elif clause == [2, 3] or clause == [2] or clause == [3]:
+            query = prefix
 
-        # # In any other case prepend with the full prefix
-        # else:
-        # query = kb.injection.prefix or prefix or ""
-        query = prefix or ""
+        # In any other case prepend with the full prefix
+        else:
+            query = kb.injection.prefix or prefix or ""
 
-        if not (expression and expression[0] == ';') and not (query and query[-1] in ('(', ')') and expression and expression[0] in ('(', ')')) and not (query and query[-1] == '('):
-            query += " "
+            if not (expression and expression[0] == ';') and not (query and query[-1] in ('(', ')') and expression and expression[0] in ('(', ')')) and not (query and query[-1] == '('):
+                query += " "
 
         query = "%s%s" % (query, expression)
 
@@ -258,20 +244,20 @@ class Agent(object):
         SQL injection request
         """
 
-        # if conf.direct:
-        #     return self.payloadDirect(expression)
+        if conf.direct:
+            return self.payloadDirect(expression)
 
         expression = self.cleanupPayload(expression)
 
         # Take default values if None
-        # suffix = kb.injection.suffix if kb.injection and suffix is None else suffix
+        suffix = kb.injection.suffix if kb.injection and suffix is None else suffix
 
-        # if kb.technique and kb.technique in kb.injection.data:
-        #     where = kb.injection.data[kb.technique].where if where is None else where
-        #     comment = kb.injection.data[kb.technique].comment if comment is None else comment
+        if kb.technique and kb.technique in kb.injection.data:
+            where = kb.injection.data[kb.technique].where if where is None else where
+            comment = kb.injection.data[kb.technique].comment if comment is None else comment
 
-        # if Backend.getIdentifiedDbms() == DBMS.ACCESS and comment == GENERIC_SQL_COMMENT:
-        #     comment = queries[DBMS.ACCESS].comment.query
+        if Backend.getIdentifiedDbms() == DBMS.ACCESS and comment == GENERIC_SQL_COMMENT:
+            comment = queries[DBMS.ACCESS].comment.query
 
         if comment is not None:
             expression += comment
@@ -289,34 +275,23 @@ class Agent(object):
     def cleanupPayload(self, payload, origValue=None):
         if payload is None:
             return
-        # print "cleanupPayload:",payload
-        chars = {'space': 'qlq', 'dollar': 'qtq', 'stop': 'qbpvq', 'start': 'qbqqq', 'delimiter': 'etbqfm', 'at': 'qaq', 'hash_': 'qpq'}
+
         _ = (
-                ("[DELIMITER_START]", chars['start']), ("[DELIMITER_STOP]", chars['stop']),\
-                ("[AT_REPLACE]", chars['at']), ("[SPACE_REPLACE]", chars['space']), ("[DO LLAR_REPLACE]", chars['dollar']),\
-                ("[HASH_REPLACE]", chars['hash_']),
+                ("[DELIMITER_START]", kb.chars.start), ("[DELIMITER_STOP]", kb.chars.stop),\
+                ("[AT_REPLACE]", kb.chars.at), ("[SPACE_REPLACE]", kb.chars.space), ("[DOLLAR_REPLACE]", kb.chars.dollar),\
+                ("[HASH_REPLACE]", kb.chars.hash_),
             )
-        # print "_:",_
-        # print "[0]",_[0]
-        # print "[1]",_[1]
-        # (('[DELIMITER_START]', 'qpbkq'), ('[DELIMITER_STOP]', 'qbpxq'), ('[AT_REPLACE]', 'qcq'), ('[SPACE_REPLACE]', 'qaq'), ('[DOLLAR_REPLACE]', 'qxq'), ('[HASH_REPLACE]', 'qlq'))
         payload = reduce(lambda x, y: x.replace(y[0], y[1]), _, payload)
-        # print "payload:",payload
-        # print "current function:",inspect.stack()[1][3]
 
         for _ in set(re.findall(r"\[RANDNUM(?:\d+)?\]", payload, re.I)):
             payload = payload.replace(_, str(randomInt()))
-        # print "payload"
 
         for _ in set(re.findall(r"\[RANDSTR(?:\d+)?\]", payload, re.I)):
             payload = payload.replace(_, randomStr())
 
-        # print "payload-------",payload
-        # print "origValue-----------",origValue
-        #### value.isdigit() ## check if the value is only composed of int
         if origValue is not None:
             payload = payload.replace("[ORIGVALUE]", origValue if origValue.isdigit() else unescaper.escape("'%s'" % origValue))
-        # print "origValue is not none"
+
         if "[INFERENCE]" in payload:
             if Backend.getIdentifiedDbms() is not None:
                 inference = queries[Backend.getIdentifiedDbms()].inference
@@ -343,7 +318,7 @@ class Agent(object):
         """
 
         if payload:
-            payload = payload.replace("[SLEEPTIME]", str(conf.timeSec))##5ms
+            payload = payload.replace("[SLEEPTIME]", str(conf.timeSec))
 
         return payload
 

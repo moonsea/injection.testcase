@@ -37,7 +37,6 @@ BANNER = """\033[01;33m
  ||   ||  //      \\\\ \\\\      || \\\\    ||        ||    ||   || ||     ||       ||     ||   ||  |||
 ||   || //        \\\\  ===== ||  \\\\   ||         ======    ||    ||  ||          =====    ||   ||\033[0m\033[4;37m\033[0m\n
 """
-
 # Minimum distance of ratio from kb.matchRatio to result in True
 DIFF_TOLERANCE = 0.05
 CONSTANT_RATIO = 0.9

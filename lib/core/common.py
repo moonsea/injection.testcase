@@ -435,7 +435,7 @@ class Backend:
     # Get methods
     @staticmethod
     def getForcedDbms():
-        return aliasToDbmsEnum(kb.get("forcedDbms"))### return kb["forcedDbms"] if kb[forcedDbma] else none
+        return aliasToDbmsEnum(kb.get("forcedDbms"))
 
     @staticmethod
     def getDbms():
@@ -2907,8 +2907,8 @@ def createGithubIssue(errMsg, excMsg):
         return
 
     msg = "\ndo you want to automatically create a new (anonymized) issue "
-    msg += "with the unhandled exception information [y/N] "
-    #msg += "the official Github repository? [y/N] "
+    msg += "with the unhandled exception information at "
+    msg += "the official Github repository? [y/N] "
     try:
         test = readInput(msg, default="N")
     except:
@@ -2918,12 +2918,7 @@ def createGithubIssue(errMsg, excMsg):
         ex = None
         errMsg = errMsg[errMsg.find("\n"):]
 
-        infoMsg = "Yes, you are right. This is just a kidding"
-        infoMsg += "If you have some problems"
-        infoMsg += "repair it by yourself"
-        logger.info(infoMsg)
 
-        """
         data = {"title": "Unhandled exception (#%s)" % key, "body": "```%s\n```\n```\n%s```" % (errMsg, excMsg)}
         req = urllib2.Request(url="https://api.github.com/repos/sqlmapproject/sqlmap/issues", data=json.dumps(data), headers={"Authorization": "token %s" % GITHUB_REPORT_OAUTH_TOKEN})
 
@@ -2948,7 +2943,6 @@ def createGithubIssue(errMsg, excMsg):
             if ex:
                 warnMsg += " ('%s')" % ex
             logger.warn(warnMsg)
-        """
 
 def maskSensitiveData(msg):
     """
