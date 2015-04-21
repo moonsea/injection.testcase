@@ -42,34 +42,12 @@ from lib.core.option import init
 from lib.core.settings import LEGAL_DISCLAIMER
 from lib.parse.cmdline import cmdLineParser
 
-def modulePath():
-    """
-    This will get us the program's directory, even if we are frozen
-    using py2exe
-    """
-
-    try:
-        _ = sys.executable if weAreFrozen() else __file__
-    except NameError:
-        _ = inspect.getsourcefile(modulePath)
-
-    return os.path.dirname(os.path.realpath(getUnicode(_, sys.getfilesystemencoding())))
-
 def main():
     """
     Main function of sqlmap when running from command line.
     """
     try:
-        """
-        paths.SQLMAP_ROOT_PATH = modulePath()#Get current path of sqlmap.py
-        setPaths()
-
-        # Store original command line options for possible later restoration
-        cmdLineOptions.update(cmdLineParser().__dict__)
-
-        initOptions(cmdLineOptions)
-        """
-
+    
         banner()
         #Show the banner of the software
 
@@ -77,11 +55,9 @@ def main():
         dataToStdout("[!] freedom disclaimer: %s\n\n" % LEGAL_DISCLAIMER, forceOutput=True)
         dataToStdout("[*] starting at %s\n\n" % time.strftime("%X"), forceOutput=True)
 
-        """
-        init()
-        #According to the input parameters, set the configure of the software
-        #### Generate testcase
-        """
+
+        # testcase_file = open("testcase_file","a")
+        # print "--------------  Generate Testcase ------------------------"
 
         start()
 
@@ -134,12 +110,7 @@ def main():
         createGithubIssue(errMsg, excMsg)
 
     finally:
-        if conf.get("showTime"):
-            dataToStdout("\n[*] shutting down at %s\n\n" % time.strftime("%X"), forceOutput=True)
-
-        kb.threadContinue = False
-        kb.threadException = True
-
+        dataToStdout("\n[*] shutting down at %s\n\n" % time.strftime("%X"), forceOutput=True)
  
 if __name__ == "__main__":
     main()
