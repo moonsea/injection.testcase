@@ -25,9 +25,9 @@ from lib.core.common import dataToStdout
 from lib.core.common import getUnicode
 from lib.core.common import maskSensitiveData
 from lib.core.common import setColor
-from lib.core.common import setPaths
+# from lib.core.common import setPaths
 from lib.core.common import weAreFrozen
-from lib.core.data import cmdLineOptions
+# from lib.core.data import cmdLineOptions
 from lib.core.data import conf
 from lib.core.data import kb
 from lib.core.data import logger
@@ -43,67 +43,15 @@ from lib.core.profiling import profile
 from lib.core.settings import LEGAL_DISCLAIMER
 from lib.core.testing import smokeTest
 from lib.core.testing import liveTest
-from lib.parse.cmdline import cmdLineParser
-#from lib.utils.api import setRestAPILog
-#from lib.utils.api import StdDbOut
-
-def modulePath():
-    """
-    This will get us the program's directory, even if we are frozen
-    using py2exe
-    """
-
-    try:
-        _ = sys.executable if weAreFrozen() else __file__
-    except NameError:
-        _ = inspect.getsourcefile(modulePath)
-
-    '''
-    print "_:"
-    print _
-    print "__file__:"
-    print __file__
-    print "real path:"
-    print getUnicode(_,sys.getfilesystemencoding())
-    print sys.getfilesystemencoding()
-    print os.path.realpath(getUnicode(_,sys.getfilesystemencoding()))
-    print "------------------------------------------------"
-    '''
-
-    return os.path.dirname(os.path.realpath(getUnicode(_, sys.getfilesystemencoding())))
+# from lib.parse.cmdline import cmdLineParser
+# from lib.utils.api import setRestAPILog
+# from lib.utils.api import StdDbOut
 
 def main():
     """
     Main function of sqlmap when running from command line.
     """
-
-    """"
-    print " "
-    print "-------------------------------------------------------------------"
-    print "------------Just Test conf -------------------------------------------------"
-    for i in conf :
-        print i
-    print conf
-    print "-------------------------------------------------------------------"
-    """
-
     try:
-        paths.SQLMAP_ROOT_PATH = modulePath()#Get current path of sqlmap.py
-        setPaths()
-
-        # Store original command line options for possible later restoration
-        cmdLineOptions.update(cmdLineParser().__dict__)
-
-        """
-        ###Get the options from cmdline command
-        print "-----------------------------------------------------------------"
-        print "---------------------  cmdLineOptions ---------------------------"
-        print cmdLineOptions
-        print "----------------------------------------------------------------"
-        for i in cmdLineOptions.keys() :
-            print i,"---------",cmdLineOptions[i]
-        print "-----------------------------------------------------------------"
-        """
 
         initOptions(cmdLineOptions)
 

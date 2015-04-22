@@ -2018,33 +2018,32 @@ def _mergeOptions(inputOptions, overrideOptions):
     print "----------------------------------------------------------"
     """
 
+    """
     if inputOptions.pickledOptions:
-        inputOptions = base64unpickle(inputOptions.pickledOptions)
+       inputOptions = base64unpickle(inputOptions.pickledOptions)
 
     if inputOptions.configFile:
-        configFileParser(inputOptions.configFile)
+       configFileParser(inputOptions.configFile)
 
     if hasattr(inputOptions, "items"):
-        inputOptionsItems = inputOptions.items()
+       inputOptionsItems = inputOptions.items()
     else:
-        inputOptionsItems = inputOptions.__dict__.items()
+       inputOptionsItems = inputOptions.__dict__.items()
 
     for key, value in inputOptionsItems:
         if key not in conf or value not in (None, False) or overrideOptions:
             conf[key] = value
-
     for key, value in conf.items():
         if value is not None:
             kb.explicitSettings.add(key)
-
     for key, value in defaults.items():
         if hasattr(conf, key) and conf[key] is None:
             conf[key] = value
-
-    _ = {}
     for key, value in os.environ.items():
         if key.upper().startswith(SQLMAP_ENVIRONMENT_PREFIX):
             _[key[len(SQLMAP_ENVIRONMENT_PREFIX):].upper()] = value
+    """
+
 
     types_ = {}
     for group in optDict.keys():
