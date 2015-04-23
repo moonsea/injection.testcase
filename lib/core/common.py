@@ -1223,11 +1223,16 @@ def parseTargetUrl():
     Parse target URL and set some attributes into the configuration singleton.
     """
 
+    """
     if not conf.url:
         return
+    """
+
+    conf.url = "id=1"
 
     originalUrl = conf.url
 
+    """
     if re.search("\[.+\]", conf.url) and not socket.has_ipv6:
         errMsg = "IPv6 addressing is not supported "
         errMsg += "on this platform"
@@ -1241,6 +1246,7 @@ def parseTargetUrl():
 
     if CUSTOM_INJECTION_MARK_CHAR in conf.url:
         conf.url = conf.url.replace('?', URI_QUESTION_MARKER)### "__QUESTION_MARK__"
+    """
 
     try:
         urlSplit = urlparse.urlsplit(conf.url)
@@ -1257,12 +1263,14 @@ def parseTargetUrl():
 
     hostnamePort = urlSplit.netloc.split(":") if not re.search("\[.+\]", urlSplit.netloc) else filter(None, (re.search("\[.+\]", urlSplit.netloc).group(0), re.search("\](:(?P<port>\d+))?", urlSplit.netloc).group("port")))
 
-    conf.scheme = urlSplit.scheme.strip().lower() if not conf.forceSSL else "https"
+    conf.scheme = urlSplit.scheme.strip().lower() # if not conf.forceSSL else "https"
     conf.path = urlSplit.path.strip()
     conf.hostname = hostnamePort[0].strip()
 
+    """
     conf.ipv6 = conf.hostname != conf.hostname.strip("[]")
     conf.hostname = conf.hostname.strip("[]").replace(CUSTOM_INJECTION_MARK_CHAR, "")
+    """
 
     try:
         _ = conf.hostname.encode("idna")
@@ -1273,6 +1281,7 @@ def parseTargetUrl():
         errMsg = "invalid target URL"
         raise SqlmapSyntaxException(errMsg)
 
+    """
     if len(hostnamePort) == 2:
         try:
             conf.port = int(hostnamePort[1])
@@ -1283,7 +1292,10 @@ def parseTargetUrl():
         conf.port = 443
     else:
         conf.port = 80
+    """
+    conf.port = 80
 
+    """
     if urlSplit.query:
         conf.parameters[PLACE.GET] = urldecode(urlSplit.query) if urlSplit.query and urlencode(DEFAULT_GET_POST_DELIMITER, None) not in urlSplit.query else urlSplit.query
 
@@ -1301,6 +1313,7 @@ def parseTargetUrl():
         logger.debug(debugMsg)
         conf.httpHeaders = filter(lambda (key, value): key != HTTP_HEADER.HOST, conf.httpHeaders)
         conf.httpHeaders.append((HTTP_HEADER.HOST, getHostHeader(conf.url)))
+    """
 
     if conf.url != originalUrl:
         kb.originalUrls[conf.url] = originalUrl

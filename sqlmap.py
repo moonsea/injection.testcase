@@ -53,16 +53,10 @@ def main():
     """
     try:
 
-        initOptions(cmdLineOptions)
+        # cmdLineOptions = { 'code': None, 'getUsers': None, 'getPasswordHashes': None, 'excludeSysDbs': None, 'uChar': None, 'skip': None, 'db': None, 'cpuThrottle': None, 'prefix': None, 'osShell': None, 'googlePage': None, 'query': None, 'getComments': None, 'randomAgent': True, 'delay': None, 'authType': None, 'isDba': None, 'requestFile': None, 'predictOutput': None, 'wizard': None, 'stopFail': None, 'forms': None, 'pivotColumn': None, 'dropSetCookie': None, 'dbmsCred': None, 'risk': None, 'sqlFile': None, 'rParam': None, 'getCurrentUser': None, 'notString': None, 'getRoles': None, 'getPrivileges': None, 'testParameter': None, 'tbl': None, 'trafficFile': None, 'osSmb': None, 'level': None, 'secondOrder': None, 'timeout': None, 'firstChar': None, 'torPort': None, 'wFile': None, 'binaryFields': None, 'checkTor': None, 'commonTables': None, 'direct': None, 'saFreq': None, 'tmpPath': None, 'titles': None, 'getSchema': None, 'timeSec': None, 'paramDel': None, 'regKey': None, 'getColumns': None, 'headers': None, 'authCred': None, 'loadCookies': None, 'dnsName': None, 'showVersion': None, 'outputDir': None, 'osBof': None, 'invalidLogical': None, 'getCurrentDb': None, 'hexConvert': None, 'proxyFile': None, 'answers': None, 'host': None, 'dependencies': None, 'cookie': None, 'rFile': None, 'regexp': None, 'optimize': None, 'limitStop': None, 'search': None, 'uFrom': None, 'noCast': None, 'testFilter': None, 'eta': None, 'csrfToken': None, 'threads': None, 'logFile': None, 'os': None, 'col': None, 'proxy': None, 'proxyCred': None, 'verbose': None, 'crawlDepth': None, 'updateAll': None, 'privEsc': None, 'forceDns': None, 'getAll': None, 'hpp': None, 'url': u'www.cowinbio.com/about/index.php?id=1*', 'invalidBignum': None, 'regType': None, 'getDbs': True, 'freshQueries': None, 'uCols': None, 'smokeTest': None, 'regData': None, 'udfInject': None, 'invalidString': None, 'tor': None, 'forceSSL': None, 'ignore401': None, 'beep': None, 'noEscape': None, 'configFile': None, 'scope': None, 'dumpAll': None, 'torType': None, 'regVal': None, 'ignoreProxy': None, 'mnemonics': None, 'skipUrlEncode': None, 'referer': None, 'agent': None, 'purgeOutput': None, 'retries': None, 'authPrivate': None, 'extensiveFp': None, 'dumpTable': None, 'advancedHelp': None, 'batch': None, 'limitStart': None, 'flushSession': None, 'osCmd': None, 'suffix': None, 'smart': None, 'regDel': None, 'shLib': None, 'sitemapUrl': None, 'identifyWaf': None, 'msfPath': None, 'getHostname': None, 'sessionFile': None, 'saveCmdline': None, 'getTables': None, 'liveTest': None, 'lastChar': None, 'checkWaf': None, 'string': None, 'dbms': None, 'dumpWhere': None, 'tamper': None, 'charset': None, 'runCase': None, 'sqlShell': None, 'osPwn': None, 'evalCode': None, 'cleanup': None, 'csrfUrl': None, 'getBanner': None, 'profile': None, 'regRead': None, 'bulkFile': None, 'safUrl': None, 'csvDel': None, 'excludeCol': None, 'dumpFormat': None, 'alert': None, 'nullConnection': None, 'user': None, 'parseErrors': None, 'getCount': None, 'dFile': None, 'data': None, 'regAdd': None, 'dummy': None, 'sqlmapShell': None, 'mobile': None, 'googleDork': None, 'pickledOptions': None, 'disableColoring': None, 'pageRank': None, 'tech': None, 'textOnly': None, 'cookieDel': None, 'commonColumns': None, 'keepAlive': None}
 
-        """
-        if hasattr(conf, "api"):
-            # Overwrite system standard output and standard error to write
-            # to an IPC database
-            sys.stdout = StdDbOut(conf.taskid, messagetype="stdout")
-            sys.stderr = StdDbOut(conf.taskid, messagetype="stderr")
-            setRestAPILog()
-        """
+        cmdLineOptions = { 'level':6,'risk':3}
+        initOptions(cmdLineOptions)
 
         banner()
         #Show the banner of the software

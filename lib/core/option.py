@@ -1474,30 +1474,14 @@ def _cleanupOptions():
     logger.debug(debugMsg)
 
     width = getConsoleWidth()
-    """
-    print "----------------------- Clenup width ----------------------"
-    print width
-    print "----------------------------------------------------------"
-    """
 
     """
-    print "--------------------- conf.eta -----------------------------"
-    print conf.eta
-    print "-----------------------------------------------------------"
-    """
-
-    """
-    print "-------------------- conf before cleanup -------------------"
-    print conf
-    for i in conf.keys() :
-        print i,"----------",conf[i]
-    print "------------------------------------------------------------"
-    """
-
     if conf.eta:##### --eta
         conf.progressWidth = width - 26
     else:
         conf.progressWidth = width - 46
+    """
+    conf.progressWidth = width - 46
 
     for key, value in conf.items():
         #print key,"-----------",value
@@ -1506,12 +1490,16 @@ def _cleanupOptions():
 
     #print conf.testParameter
 
+    """
     if conf.testParameter:##-p testparameter
         conf.testParameter = urldecode(conf.testParameter)
         conf.testParameter = conf.testParameter.replace(" ", "")
         conf.testParameter = re.split(PARAMETER_SPLITTING_REGEX, conf.testParameter)###'[,|;]'
     else:
         conf.testParameter = []
+    """
+    conf.testParameter = []
+
 
     if conf.user:
         conf.user = conf.user.replace(" ", "")
@@ -1635,14 +1623,6 @@ def _cleanupOptions():
     if conf.binaryFields:
         conf.binaryFields = re.sub(r"\s*,\s*", ",", conf.binaryFields)
 
-    """
-    print "---------------------- conf after clenup -----------------"
-    print conf
-    for i in conf.keys():
-        print i,"-------",conf[i]
-    print "---------------------------------------------------------"
-    """
-
     threadData = getCurrentThreadData()
     threadData.reset()
 
@@ -1690,6 +1670,7 @@ def _setConfAttributes():
     conf.tests = []
     conf.trafficFP = None
     conf.wFileType = None
+    conf.verbose = 6
 
 def _setKnowledgeBaseAttributes(flushAll=True):
     """
@@ -1829,6 +1810,7 @@ def _setKnowledgeBaseAttributes(flushAll=True):
     kb.unionDuplicates = False
     kb.xpCmdshellAvailable = False
 
+    paths.SQL_KEYWORDS = "../txt/keywords.txt"
     if flushAll:
         kb.headerPaths = {}
         kb.keywords = set(getFileItems(paths.SQL_KEYWORDS))
@@ -1980,10 +1962,11 @@ def setVerbosity():
     """
 
     if conf.verbose is None:
-        conf.verbose = 1
+        conf.verbose = 6 
 
     conf.verbose = int(conf.verbose)
 
+    """
     if conf.verbose == 0:
         logger.setLevel(logging.ERROR)
     elif conf.verbose == 1:
@@ -1999,6 +1982,7 @@ def setVerbosity():
         logger.setLevel(CUSTOM_LOGGING.TRAFFIC_OUT)
     elif conf.verbose >= 5:
         logger.setLevel(CUSTOM_LOGGING.TRAFFIC_IN)
+    """
 
 def _mergeOptions(inputOptions, overrideOptions):
     """
@@ -2009,21 +1993,12 @@ def _mergeOptions(inputOptions, overrideOptions):
     """
 
     """
-    print "----------------------------------------------------------"
-    print "-----------------   inputOptions -------------------------"
-    print inputOptions
-    print "----------------------------------------------------------"
-    for i in inputOptions.keys():
-        print i,"--------------",inputOptions[i]
-    print "----------------------------------------------------------"
-    """
-
-    """
     if inputOptions.pickledOptions:
        inputOptions = base64unpickle(inputOptions.pickledOptions)
 
     if inputOptions.configFile:
        configFileParser(inputOptions.configFile)
+    """
 
     if hasattr(inputOptions, "items"):
        inputOptionsItems = inputOptions.items()
@@ -2042,8 +2017,6 @@ def _mergeOptions(inputOptions, overrideOptions):
     for key, value in os.environ.items():
         if key.upper().startswith(SQLMAP_ENVIRONMENT_PREFIX):
             _[key[len(SQLMAP_ENVIRONMENT_PREFIX):].upper()] = value
-    """
-
 
     types_ = {}
     for group in optDict.keys():
@@ -2418,7 +2391,7 @@ def initOptions(inputOptions=AttribDict(), overrideOptions=False):
 
     _setConfAttributes()
     _setKnowledgeBaseAttributes()
-    _mergeOptions(inputOptions, overrideOptions)
+    # _mergeOptions(inputOptions, overrideOptions)
 
 def init():
     """
@@ -2426,36 +2399,15 @@ def init():
     based upon command line and configuration file options.
     """
 
-    _useWizardInterface()##--wizard
-    setVerbosity()##-v 1
-    _saveCmdline()## --save
-    _setRequestFromFile()## -r "requestFileName"
-    _cleanupOptions()## --cleanup ##just filter input
-    _purgeOutput()## --purge_out ###remove output file safely
-    _checkDependencies()## --denpendencies  ###check dependencies of libraries
-    _basicOptionValidation()## --basic option validation ## just to check the parameter whether all right
-    _setProxyList()## --proxy-file ###load proxy list from file
-    _setTorProxySettings()## --tor ##set tor proxy and establish connection to test
-    _setDNSServer()## --dns-domain  ###set dnsserver as administrator
+    setVerbosity()##-v 6
+    # print "---------------"
+    # _cleanupOptions()## --cleanup ##just filter input
+    # _basicOptionValidation()## --basic option validation ## just to check the parameter whether all right
+    # print "---------------"
     _adjustLoggingFormatter()## set logging format
-    _setMultipleTargets()## -l Filename ### Parse targets from logfile
-    _setTamperingFunctions()## --tamper tamperName  ###mutation input
-    _setWafFunctions()## --identify-waf ##Test through for WAF/IPS/IDS
-    _setTrafficOutputFP()## -t ## Load HTTP traffic into a texttual file
+    # _setWafFunctions()## --identify-waf ##Test through for WAF/IPS/IDS
     _resolveCrossReferences()
-    """
-    print "----------------------------- after resolvecrossreferences ----------------"
-    print "-------------------------  kb ------------------------------------"
-    kb_info_file = open("kb_info_file_bofore","w+")
-    for key in kb.keys():
-        print >> kb_info_file, key,"-------",kb[key]
-    print "------------------------------------------------------------------"
-    conf_info_file = open("conf_info_before.txt","w+")
-    print "---------------- Before getPageTemplate --- conf -----------------------"
-    for key  in conf.keys():
-        print >> conf_info_file, key,"------",conf[key]
-    conf_info_file.close()
-    print "------------------------------------------------------------------"
+    print "------------ init ------------------------------"
     """
 
     parseTargetUrl()### -u ###Parse the url to set the hostname, port
