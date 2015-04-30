@@ -38,6 +38,15 @@ from lib.core.settings import GENERIC_SQL_COMMENT
 from lib.core.settings import PAYLOAD_DELIMITER
 from lib.core.settings import REPLACEMENT_MARKER
 from lib.core.unescaper import unescaper
+from lib.core.settings import KB_CHARS_BOUNDARY_CHAR
+from lib.core.settings import KB_CHARS_LOW_FREQUENCY_ALPHABET
+from lib.core.datatype import AttribDict
+
+kb.chars = AttribDict() 
+kb.chars.delimiter = randomStr(length=6, lowercase=True)
+kb.chars.start = "%s%s%s" % (KB_CHARS_BOUNDARY_CHAR, randomStr(length=3, alphabet=KB_CHARS_LOW_FREQUENCY_ALPHABET), KB_CHARS_BOUNDARY_CHAR)
+kb.chars.stop = "%s%s%s" % (KB_CHARS_BOUNDARY_CHAR, randomStr(length=3, alphabet=KB_CHARS_LOW_FREQUENCY_ALPHABET), KB_CHARS_BOUNDARY_CHAR)
+kb.chars.at, kb.chars.space, kb.chars.dollar, kb.chars.hash_ = ("%s%s%s" % (KB_CHARS_BOUNDARY_CHAR, _, KB_CHARS_BOUNDARY_CHAR) for _ in randomStr(length=4, lowercase=True))
 
 class Agent(object):
     """
@@ -281,6 +290,7 @@ class Agent(object):
                 ("[AT_REPLACE]", kb.chars.at), ("[SPACE_REPLACE]", kb.chars.space), ("[DOLLAR_REPLACE]", kb.chars.dollar),\
                 ("[HASH_REPLACE]", kb.chars.hash_),
             )
+        # print _
         payload = reduce(lambda x, y: x.replace(y[0], y[1]), _, payload)
 
         for _ in set(re.findall(r"\[RANDNUM(?:\d+)?\]", payload, re.I)):
@@ -327,7 +337,7 @@ class Agent(object):
         Returns comment form for the given request
         """
 
-        return request.comment if "comment" in request else ""
+        return request["comment"] if "comment" in request else ""
 
     def hexConvertField(self, field):
         """

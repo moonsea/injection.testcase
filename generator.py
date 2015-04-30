@@ -2,10 +2,15 @@
 
 import json
 from xml.etree import ElementTree as et
+from lib.core.enums import PAYLOAD
+from lib.core.agent import agent 
+from lib.core.datatype import AttribDict
 
 PAYLOADS_XML = ".\\xml\\payloads.xml"
 boundaries = [] 
 tests = []
+kb = AttribDict()
+kb.data = AttribDict()
 
 def cleanupVals(text, tag):
     if tag in ("clause", "where"):
@@ -20,7 +25,7 @@ def cleanupVals(text, tag):
         for _ in text:
             text[count] = int(_) if _.isdigit() else str(_)
             count += 1
-
+ 
         if len(text) == 1 and tag not in ("clause", "where"):
             text = text[0]
 
@@ -71,67 +76,414 @@ def loadPayloads():
 
     root = doc.getroot()
     parseXmlNode(root)
+    """
     print len(tests)
     print "------------"
     print len(boundaries)
     with open("tests_xml","w") as tests_xml:
         for node in tests:
             print >> tests_xml, node,"\n"
+    """
 
-# with open("tests","w") as tests_file:
-# 	json.dump(tests,tests_file)
+def checkSqlInjection(payload_file):
 
-# with open("boundaries","w") as boundaries_file:
+    while tests:
+        test = tests.pop(0)
+        
+        try:
+            title = test["title"]
+            testType = stype = test["stype"]
+            clause = test["clause"]
+            unionExtended = False
+
+            """
+            # Test for UNION
+            if stype == PAYLOAD.TECHNIQUE.UNION: # PAYLOAD.TECHNIQUE.UNION = 3
+                # configUnion(test.request.char)
+
+                if "[CHAR]" in title:
+                    title = title.replace("[CHAR]", "CHAR")
+
+                elif "[RANDNUM]" in title or "(NULL)" in title:
+                    title = title.replace("[RANDNUM]", "random number")
+
+                if test.request.columns == "[COLSTART]-[COLSTOP]":
+                    title = title.replace("[COLSTART]", str("1"))
+                    title = title.replace("[COLSTOP]", str("5"))
+
+                match = re.search(r"(\d+)-(\d+)", test.request.columns)
+                if injection.data and match:
+                    lower, upper = int(match.group(1)), int(match.group(2))
+                    for _ in (lower, upper):
+                        if _ > 1:
+                            unionExtended = True
+                            test.request.columns = re.sub(r"\b%d\b" % _, str(2 * _), test.request.columns)
+                            title = re.sub(r"\b%d\b" % _, str(2 * _), title)
+                            test.title = re.sub(r"\b%d\b" % _, str(2 * _), test.title)
+            """
+
+            # Skip test if it does not match the same SQL injection clause
+            # already identified by another test
+            clauseMatch = False
+
+            """
+            for clauseTest in clause:
+                if injection.clause is not None and clauseTest in injection.clause:
+                    clauseMatch = True
+                    break
+            """
+
+            # Parse test's <request>
+            comment = agent.getComment(test["request"])
+            """
+            try:
+                fstPayload = agent.cleanupPayload(test["request"]["payload"], origValue=1)
+                print >> payload_file, fstPayload 
+            except:
+                print "[Error] Int value generate failed" 
+            """
+
+            try:
+                fstPayload = agent.cleanupPayload(test["request"]["payload"], origValue="1")
+                print >> payload_file, fstPayload 
+            except:
+                print "[Error] String value generate failed :",test
+
+            """
+            try:
+                fstPayload = agent.cleanupPayload(test["request"]["payload"], origValue=None)
+                print >> payload_file, fstPayload 
+            except:
+                print "[Error] None value generate failed"
+            """
+            
+            for boundary in boundaries:
+
+                # Skip boundary if it does not match against test's <clause>
+                # Parse test's <clause> and boundary's <clause>
+                clauseMatch = False
+
+                for clauseTest in test["clause"]:
+                    if clauseTest in boundary["clause"]:
+                        clauseMatch = True
+                        break
+
+                print "teset --------",test["clause"]
+                print "boundary ------------",boundary["clause"]
+                print "clausematch ----------",clauseMatch
+                if test["clause"] != [0] and boundaryr["clause"] != [0] and not clauseMatch:
+                    print "--------------------------------------------------------"
+                    continue
+
+                # Skip boundary if it does not match against test's <where>
+                # Parse test's <where> and boundary's <where>
+                whereMatch = False
+
+                for where in test["where"]:
+                    if where in boundary["where"]:
+                        whereMatch = True
+                        break
+
+                if not whereMatch:
+                    continue
+
+                # Parse boundary's <prefix>, <suffix> and <ptype>
+                prefix = boundaryr["prefix"] if boundary["prefix"] else ""
+                suffix = boundary["suffix"] if boundary["suffix"] else ""
+
+                ptype = boundary["ptype"]
 
 
-# 	json.dump(boundaries,boundaries_file)
-# tests_file = open("tests","w+")
+                # For each test's <where>
+                for where in test["where"]:
+                    templatePayload = None
+                    vector = None
+                    place = "GET"
+                    parameter = "id"
+                    value = "1"
 
-# boundaries_file = open("boundaries","w+")
+                    # Threat the parameter original value according to the
+                    # test's <where> tag
+                    if where == PAYLOAD.WHERE.ORIGINAL :
+                        origValue = "1" 
+                        templatePayload = agent.payload(place, parameter, value="", newValue=origValue, where=where)
 
-# # tests_encodejson = json.dumps(tests)
-# try:
-# 	# tests_file.write(tests_encodejson)
-# 	json.dumps(tests,tests_file)
-# except:
-# 	print "tests_encodejson write failed"
-# finally:
-# 	tests_file.close()
+                        try:
+                            print >>payload_file,templatePayload
+                        except:
+                            print "[Error] PAYLOAD.WHERE.ORIGINAL generate failed"
 
-# boundaries_encodejson = json.dumps(boundaries)
+                    elif where == PAYLOAD.WHERE.NEGATIVE:
+                        # Use different page template than the original
+                        # one as we are changing parameters value, which
+                        # will likely result in a different content
+                        kb.data.setdefault("randomInt", str(randomInt(10)))
+                        kb.data.setdefault("randomStr", str(randomStr(10)))
 
-# try:
-# 	# boundaries_file.write(boundaries_encodejson)
-# 	json.dumps(boundaries,boundaries_file)
-# except:
-# 	print "boundaries_encodejson write failed"
-# finally:
-# 	boundaries_file.close()
+                        _ = int(kb.data.randomInt[:2])
+                        origValue = "%s AND %s=%s" % (value, _, _ + 1)
+                        templatePayload = agent.payload(place, parameter, value="", newValue=origValue, where=where)
+                        try:
+                            print >>payload_file,templatePayload
+                        except:
+                            print "[Error] PAYLOAD.WHERE.NEGATIVE invalidLogical generate failed"
 
+                        origValue = kb.data.randomInt[:6]
+                        templatePayload = agent.payload(place, parameter, value="", newValue=origValue, where=where)
+                        try:
+                            print >>payload_file,templatePayload
+                        except:
+                            print "[Error] PAYLOAD.WHERE.NEGATIVE invalidBignum generate failed"
 
-# tests_file = open("tests","r")
-# try:
-# 	tests = json.load(tests_file)
-# 	print tests
-# except:
-# 	print "load failed"
-# finally:
-# 	tests_file.close
+                        origValue = kb.data.randomStr[:6]
+                        templatePayload = agent.payload(place, parameter, value="", newValue=origValue, where=where)
+                        try:
+                            print >>payload_file,templatePayload
+                        except:
+                            print "[Error] PAYLOAD.WHERE.NEGATIVE invalidString generate failed"
 
-# TESTS_FILE = "tests"
-# BOUNDARIES_FILE = "boundaries"
+                        origValue = "-%s" % kb.data.randomInt[:4]
+                        templatePayload = agent.payload(place, parameter, value="", newValue=origValue, where=where)
+                        try:
+                            print >>payload_file,templatePayload
+                        except:
+                            print "[Error] PAYLOAD.WHERE.REPLACE generate failed"
 
-def LoadJson():
-	with open("tests","r") as tests_file:
-		tests = json.load(tests_file)
+                    elif where == PAYLOAD.WHERE.REPLACE:
+                        origValue = ""
 
-	with open("boundaries","r") as boundaries_file:
-		boundaries = json.load(boundaries_file)
-	print tests
-	for key in boundaries[0] :
-		print key,"---------",boundaries[0][key]
+                    """
+                    # Forge request payload by prepending with boundary's
+                    # prefix and appending the boundary's suffix to the
+                    # test's ' <payload><comment> ' string
+                    boundPayload = agent.prefixQuery(fstPayload, prefix, where, clause)
+                    boundPayload = agent.suffixQuery(boundPayload, comment, suffix, where)
+                    reqPayload = agent.payload(place, parameter, newValue=boundPayload, where=where)
 
+                    # Perform the test's request and check whether or not the
+                    # payload was successful
+                    # Parse test's <response>
+                    for method, check in test.response.items():
+                        check = agent.cleanupPayload(check, origValue=value if place not in (PLACE.URI, PLACE.CUSTOM_POST, PLACE.CUSTOM_HEADER) else None)
+
+                        # In case of boolean-based blind SQL injection
+                        if method == PAYLOAD.METHOD.COMPARISON:
+                            # Generate payload used for comparison
+                            def genCmpPayload():
+                                sndPayload = agent.cleanupPayload(test.response.comparison, origValue=value if place not in (PLACE.URI, PLACE.CUSTOM_POST, PLACE.CUSTOM_HEADER) else None)
+
+                                # Forge response payload by prepending with
+                                # boundary's prefix and appending the boundary's
+                                # suffix to the test's ' <payload><comment> '
+                                # string
+                                boundPayload = agent.prefixQuery(sndPayload, prefix, where, clause)
+                                boundPayload = agent.suffixQuery(boundPayload, comment, suffix, where)
+                                cmpPayload = agent.payload(place, parameter, newValue=boundPayload, where=where)
+
+                                return cmpPayload
+
+                            # Useful to set kb.matchRatio at first based on
+                            # the False response content
+                            kb.matchRatio = None
+                            kb.negativeLogic = (where == PAYLOAD.WHERE.NEGATIVE)
+                            Request.queryPage(genCmpPayload(), place, raise404=False)
+                            falsePage = threadData.lastComparisonPage or ""
+
+                            # Perform the test's True request
+                            trueResult = Request.queryPage(reqPayload, place, raise404=False)
+                            truePage = threadData.lastComparisonPage or ""
+
+                            if trueResult:
+                                falseResult = Request.queryPage(genCmpPayload(), place, raise404=False)
+
+                                # Perform the test's False request
+                                if not falseResult:
+                                    infoMsg = "%s parameter '%s' seems to be '%s' injectable " % (place, parameter, title)
+                                    logger.info(infoMsg)
+
+                                    injectable = True
+
+                            if not injectable and not any((conf.string, conf.notString, conf.regexp)) and kb.pageStable:
+                                trueSet = set(extractTextTagContent(truePage))
+                                falseSet = set(extractTextTagContent(falsePage))
+                                candidates = filter(None, (_.strip() if _.strip() in (kb.pageTemplate or "") and _.strip() not in falsePage and _.strip() not in threadData.lastComparisonHeaders else None for _ in (trueSet - falseSet)))
+                                if candidates:
+                                    conf.string = candidates[0]
+                                    infoMsg = "%s parameter '%s' seems to be '%s' injectable (with --string=\"%s\")" % (place, parameter, title, repr(conf.string).lstrip('u').strip("'"))
+                                    logger.info(infoMsg)
+
+                                    injectable = True
+
+                        # In case of error-based SQL injection
+                        elif method == PAYLOAD.METHOD.GREP:
+                            # Perform the test's request and grep the response
+                            # body for the test's <grep> regular expression
+                            try:
+                                page, headers = Request.queryPage(reqPayload, place, content=True, raise404=False)
+                                output = extractRegexResult(check, page, re.DOTALL | re.IGNORECASE) \
+                                        or extractRegexResult(check, listToStrValue( \
+                                        [headers[key] for key in headers.keys() if key.lower() != URI_HTTP_HEADER.lower()] \
+                                        if headers else None), re.DOTALL | re.IGNORECASE) \
+                                        or extractRegexResult(check, threadData.lastRedirectMsg[1] \
+                                        if threadData.lastRedirectMsg and threadData.lastRedirectMsg[0] == \
+                                        threadData.lastRequestUID else None, re.DOTALL | re.IGNORECASE)
+
+                                if output:
+                                    result = output == "1"
+
+                                    if result:
+                                        infoMsg = "%s parameter '%s' is '%s' injectable " % (place, parameter, title)
+                                        logger.info(infoMsg)
+
+                                        injectable = True
+
+                            except SqlmapConnectionException, msg:
+                                debugMsg = "problem occurred most likely because the "
+                                debugMsg += "server hasn't recovered as expected from the "
+                                debugMsg += "error-based payload used ('%s')" % msg
+                                logger.debug(debugMsg)
+
+                        # In case of time-based blind or stacked queries
+                        # SQL injections
+                        elif method == PAYLOAD.METHOD.TIME:
+                            # Perform the test's request
+                            trueResult = Request.queryPage(reqPayload, place, timeBasedCompare=True, raise404=False)
+
+                            if trueResult:
+                                # Confirm test's results
+                                trueResult = Request.queryPage(reqPayload, place, timeBasedCompare=True, raise404=False)
+
+                                if trueResult:
+                                    infoMsg = "%s parameter '%s' seems to be '%s' injectable " % (place, parameter, title)
+                                    logger.info(infoMsg)
+
+                                    injectable = True
+
+                        # In case of UNION query SQL injection
+                        elif method == PAYLOAD.METHOD.UNION:
+                            # Test for UNION injection and set the sample
+                            # payload as well as the vector.
+                            # NOTE: vector is set to a tuple with 6 elements,
+                            # used afterwards by Agent.forgeUnionQuery()
+                            # method to forge the UNION query payload
+
+                            configUnion(test.request.char, test.request.columns)
+
+                            if not Backend.getIdentifiedDbms():
+                                if kb.heuristicDbms in (None, UNKNOWN_DBMS):
+                                    warnMsg = "using unescaped version of the test "
+                                    warnMsg += "because of zero knowledge of the "
+                                    warnMsg += "back-end DBMS. You can try to "
+                                    warnMsg += "explicitly set it using option '--dbms'"
+                                    singleTimeWarnMessage(warnMsg)
+                                else:
+                                    Backend.forceDbms(kb.heuristicDbms)
+
+                            if unionExtended:
+                                infoMsg = "automatically extending ranges "
+                                infoMsg += "for UNION query injection technique tests as "
+                                infoMsg += "there is at least one other (potential) "
+                                infoMsg += "technique found"
+                                singleTimeLogMessage(infoMsg)
+
+                            # Test for UNION query SQL injection
+                            reqPayload, vector = unionTest(comment, place, parameter, value, prefix, suffix)
+
+                            if isinstance(reqPayload, basestring):
+                                infoMsg = "%s parameter '%s' is '%s' injectable" % (place, parameter, title)
+                                logger.info(infoMsg)
+
+                                injectable = True
+
+                                # Overwrite 'where' because it can be set
+                                # by unionTest() directly
+                                where = vector[6]
+
+                        kb.previousMethod = method
+
+                        if conf.dummy:
+                            injectable = False
+
+                    # If the injection test was successful feed the injection
+                    # object with the test's details
+                    if injectable is True:
+                        # Feed with the boundaries details only the first time a
+                        # test has been successful
+                        if injection.place is None or injection.parameter is None:
+                            if place in (PLACE.USER_AGENT, PLACE.REFERER, PLACE.HOST):
+                                injection.parameter = place
+                            else:
+                                injection.parameter = parameter
+
+                            injection.place = place
+                            injection.ptype = ptype
+                            injection.prefix = prefix
+                            injection.suffix = suffix
+                            injection.clause = clause
+
+                        # Feed with test details every time a test is successful
+                        if hasattr(test, "details"):
+                            for dKey, dValue in test.details.items():
+                                if dKey == "dbms":
+                                    injection.dbms = dValue
+                                    if not isinstance(dValue, list):
+                                        Backend.setDbms(dValue)
+                                    else:
+                                        Backend.forceDbms(dValue[0], True)
+                                elif dKey == "dbms_version" and injection.dbms_version is None and not conf.testFilter:
+                                    injection.dbms_version = Backend.setVersion(dValue)
+                                elif dKey == "os" and injection.os is None:
+                                    injection.os = Backend.setOs(dValue)
+
+                        if vector is None and "vector" in test and test.vector is not None:
+                            vector = test.vector
+
+                        injection.data[stype] = AttribDict()
+                        injection.data[stype].title = title
+                        injection.data[stype].payload = agent.removePayloadDelimiters(reqPayload)
+                        injection.data[stype].where = where
+                        injection.data[stype].vector = vector
+                        injection.data[stype].comment = comment
+                        injection.data[stype].templatePayload = templatePayload
+                        injection.data[stype].matchRatio = kb.matchRatio
+
+                        injection.conf.textOnly = conf.textOnly
+                        injection.conf.titles = conf.titles
+                        injection.conf.string = conf.string
+                        injection.conf.notString = conf.notString
+                        injection.conf.regexp = conf.regexp
+                        injection.conf.optimize = conf.optimize
+
+                        if not kb.alerted:
+                            if conf.beep:
+                                beep()
+
+                            if conf.alert:
+                                infoMsg = "executing alerting shell command(s) ('%s')" % conf.alert
+                                logger.info(infoMsg)
+
+                                process = execute(conf.alert, shell=True)
+                                process.wait()
+
+                            kb.alerted = True
+
+                        # There is no need to perform this test for other
+                        # <where> tags
+                        break
+                """
+
+        finally:
+            pass
 
 if __name__ == '__main__':
-    # LoadJson()
+
     loadPayloads()
+    # checkSqlInjection()
+    payload_file = open("payloads","w")
+    try:
+        checkSqlInjection(payload_file)
+        print "[Info] Payloads generate successfully"
+    except:
+        print "payloads generat failed"
+    finally:
+        payload_file.close()
