@@ -5,6 +5,8 @@ from xml.etree import ElementTree as et
 from lib.core.enums import PAYLOAD
 from lib.core.agent import agent 
 from lib.core.datatype import AttribDict
+from lib.core.common import randomInt
+from lib.core.common import randomStr
 
 PAYLOADS_XML = ".\\xml\\payloads.xml"
 boundaries = [] 
@@ -145,6 +147,7 @@ def checkSqlInjection(payload_file):
 
             try:
                 fstPayload = agent.cleanupPayload(test["request"]["payload"], origValue="1")
+                # print fstPayload
                 print >> payload_file, fstPayload 
             except:
                 print "[Error] String value generate failed :",test
@@ -168,11 +171,7 @@ def checkSqlInjection(payload_file):
                         clauseMatch = True
                         break
 
-                print "teset --------",test["clause"]
-                print "boundary ------------",boundary["clause"]
-                print "clausematch ----------",clauseMatch
-                if test["clause"] != [0] and boundaryr["clause"] != [0] and not clauseMatch:
-                    print "--------------------------------------------------------"
+                if test["clause"] != [0] and boundary["clause"] != [0] and not clauseMatch:
                     continue
 
                 # Skip boundary if it does not match against test's <where>
@@ -188,7 +187,7 @@ def checkSqlInjection(payload_file):
                     continue
 
                 # Parse boundary's <prefix>, <suffix> and <ptype>
-                prefix = boundaryr["prefix"] if boundary["prefix"] else ""
+                prefix = boundary["prefix"] if boundary["prefix"] else ""
                 suffix = boundary["suffix"] if boundary["suffix"] else ""
 
                 ptype = boundary["ptype"]
@@ -201,26 +200,29 @@ def checkSqlInjection(payload_file):
                     place = "GET"
                     parameter = "id"
                     value = "1"
+                    print "where -----",where
 
                     # Threat the parameter original value according to the
                     # test's <where> tag
-                    if where == PAYLOAD.WHERE.ORIGINAL :
+                    if where == PAYLOAD.WHERE.ORIGINAL : # 1
                         origValue = "1" 
                         templatePayload = agent.payload(place, parameter, value="", newValue=origValue, where=where)
 
                         try:
-                            print >>payload_file,templatePayload
+                            print >>payload_file,"WHERE.ORIGINAL ---",templatePayload
                         except:
                             print "[Error] PAYLOAD.WHERE.ORIGINAL generate failed"
 
-                    elif where == PAYLOAD.WHERE.NEGATIVE:
+                    elif where == PAYLOAD.WHERE.NEGATIVE: #2
                         # Use different page template than the original
                         # one as we are changing parameters value, which
                         # will likely result in a different content
-                        kb.data.setdefault("randomInt", str(randomInt(10)))
-                        kb.data.setdefault("randomStr", str(randomStr(10)))
+                        print "1++++++++++++++++++++++++++++++++++++++++++++++++++++++++++=="
+                        kb.data["randomInt"] = str(randomInt(10))
+                        kb.data["randomStr"] = str(randomStr(10))
+                        print "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++=="
 
-                        _ = int(kb.data.randomInt[:2])
+                        _ = int(kb.data["randomInt"][:2])
                         origValue = "%s AND %s=%s" % (value, _, _ + 1)
                         templatePayload = agent.payload(place, parameter, value="", newValue=origValue, where=where)
                         try:
@@ -228,28 +230,28 @@ def checkSqlInjection(payload_file):
                         except:
                             print "[Error] PAYLOAD.WHERE.NEGATIVE invalidLogical generate failed"
 
-                        origValue = kb.data.randomInt[:6]
+                        origValue = kb.data["randomInt"][:6]
                         templatePayload = agent.payload(place, parameter, value="", newValue=origValue, where=where)
                         try:
                             print >>payload_file,templatePayload
                         except:
                             print "[Error] PAYLOAD.WHERE.NEGATIVE invalidBignum generate failed"
 
-                        origValue = kb.data.randomStr[:6]
+                        origValue = kb.data["randomStr"][:6]
                         templatePayload = agent.payload(place, parameter, value="", newValue=origValue, where=where)
                         try:
                             print >>payload_file,templatePayload
                         except:
                             print "[Error] PAYLOAD.WHERE.NEGATIVE invalidString generate failed"
 
-                        origValue = "-%s" % kb.data.randomInt[:4]
+                        origValue = "-%s" % kb.data["randomInt"][:4]
                         templatePayload = agent.payload(place, parameter, value="", newValue=origValue, where=where)
                         try:
                             print >>payload_file,templatePayload
                         except:
                             print "[Error] PAYLOAD.WHERE.REPLACE generate failed"
 
-                    elif where == PAYLOAD.WHERE.REPLACE:
+                    elif where == PAYLOAD.WHERE.REPLACE: # 3
                         origValue = ""
 
                     """
@@ -480,10 +482,11 @@ if __name__ == '__main__':
     loadPayloads()
     # checkSqlInjection()
     payload_file = open("payloads","w")
-    try:
-        checkSqlInjection(payload_file)
-        print "[Info] Payloads generate successfully"
-    except:
-        print "payloads generat failed"
-    finally:
-        payload_file.close()
+##    try:
+##        checkSqlInjection(payload_file)
+##        print "[Info] Payloads generate successfully"
+##    except:
+##        print "payloads generat failed"
+##    finally:
+##        payload_file.close()
+    checkSqlInjection(payload_file)

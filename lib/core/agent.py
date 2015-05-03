@@ -80,49 +80,28 @@ class Agent(object):
         injection statement to request
         """
 
-        #### Connect the Database Directly
-        if conf.direct:
-            return self.payloadDirect(newValue)
-
         retVal = ""
 
-        # print "kb.technique -----------",kb.technique
-        if where is None and isTechniqueAvailable(kb.technique):
-            where = kb.injection.data[kb.technique].where
-        # print "where ----------------",where
-
-        if kb.injection.place is not None:
-            place = kb.injection.place
+        #    place = kb.injection.place
         # print "place ----------------",place
 
-        if kb.injection.parameter is not None:
-            parameter = kb.injection.parameter
+        # if kb.injection.parameter is not None:
+        #    parameter = kb.injection.parameter
         # print "parameter ---------------",parameter
 
-        paramString = conf.parameters[place]### None at the beginning
-        paramDict = conf.paramDict[place]### {} at the beginning
-        origValue = paramDict[parameter]###  { } at the beginning
-
-       #    print "paramstring ----------------------",paramString
-       #    print "paramDict ------------------------",paramDict
-       #    print "origValue --------------------------",origValue
+        paramString = "id=1" #None# conf.parameters[place]### None at the beginning
+        paramDict = None #conf.paramDict[place]### {} at the beginning
+        origValue = "1" #None#paramDict[parameter]###  { } at the beginning
 
         if place == PLACE.URI:
             paramString = origValue
-            """
-            print "----------------  OrigValue ---------------------------"
-            print origValue
-            print "----------------------------------------------------------"
-            """
+
             origValue = origValue.split(CUSTOM_INJECTION_MARK_CHAR)[0]####  "*"
-            #print origValue
             origValue = origValue[origValue.rfind('/') + 1:]
-            #print origValue
+
             for char in ('?', '=', ':'):
                 if char in origValue:
                     origValue = origValue[origValue.rfind(char) + 1:]
-            #print origValue
-            #print "------------------------------------------------------------"
             
         elif place == PLACE.CUSTOM_POST:
             paramString = origValue
@@ -134,6 +113,7 @@ class Agent(object):
             else:
                 _ = extractRegexResult(r"(?s)(?P<result>[^\s<>{}();'\"&]+\Z)", origValue) or ""
                 origValue = _.split('=', 1)[1] if '=' in _ else ""
+
         elif place == PLACE.CUSTOM_HEADER:
             paramString = origValue
             origValue = origValue.split(CUSTOM_INJECTION_MARK_CHAR)[0]
@@ -142,9 +122,7 @@ class Agent(object):
             if match:
                 origValue = match.group("value")
 
-        if conf.prefix:
-            value = origValue
-
+        # print "+-+_+_+_+_=_+-=-+_+=_+_=-=-=-+_+-=_+_=_=-+_+_+_+_+_+_+_+_+_+"
         if value is None:
             if where == PAYLOAD.WHERE.ORIGINAL:
                 value = origValue
