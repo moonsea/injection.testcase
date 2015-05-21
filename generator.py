@@ -200,7 +200,7 @@ def checkSqlInjection(payload_file):
                     place = "GET"
                     parameter = "id"
                     value = "1"
-                    print "where -----",where
+                    # print "where -----",where
 
                     # Threat the parameter original value according to the
                     # test's <where> tag
@@ -209,7 +209,7 @@ def checkSqlInjection(payload_file):
                         templatePayload = agent.payload(place, parameter, value="", newValue=origValue, where=where)
 
                         try:
-                            print >>payload_file,"WHERE.ORIGINAL ---",templatePayload
+                            print >>payload_file,templatePayload
                         except:
                             print "[Error] PAYLOAD.WHERE.ORIGINAL generate failed"
 
@@ -217,10 +217,10 @@ def checkSqlInjection(payload_file):
                         # Use different page template than the original
                         # one as we are changing parameters value, which
                         # will likely result in a different content
-                        print "1++++++++++++++++++++++++++++++++++++++++++++++++++++++++++=="
+                        # print "1++++++++++++++++++++++++++++++++++++++++++++++++++++++++++=="
                         kb.data["randomInt"] = str(randomInt(10))
                         kb.data["randomStr"] = str(randomStr(10))
-                        print "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++=="
+                        # print "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++=="
 
                         _ = int(kb.data["randomInt"][:2])
                         origValue = "%s AND %s=%s" % (value, _, _ + 1)
@@ -254,7 +254,6 @@ def checkSqlInjection(payload_file):
                     elif where == PAYLOAD.WHERE.REPLACE: # 3
                         origValue = ""
 
-                    """
                     # Forge request payload by prepending with boundary's
                     # prefix and appending the boundary's suffix to the
                     # test's ' <payload><comment> ' string
@@ -472,8 +471,7 @@ def checkSqlInjection(payload_file):
                         # There is no need to perform this test for other
                         # <where> tags
                         break
-                """
-
+                
         finally:
             pass
 

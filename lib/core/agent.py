@@ -190,33 +190,33 @@ class Agent(object):
         identified as valid
         """
 
-        if conf.direct:
-            return self.payloadDirect(expression)
+        # if conf.direct:
+        #     return self.payloadDirect(expression)
 
         expression = self.cleanupPayload(expression)
         expression = unescaper.escape(expression)
         query = None
 
-        if where is None and kb.technique and kb.technique in kb.injection.data:
-            where = kb.injection.data[kb.technique].where
+        # if where is None and kb.technique and kb.technique in kb.injection.data:
+        #     where = kb.injection.data[kb.technique].where
 
         # If we are replacing (<where>) the parameter original value with
         # our payload do not prepend with the prefix
-        if where == PAYLOAD.WHERE.REPLACE and not conf.prefix:
+        if where == PAYLOAD.WHERE.REPLACE :
             query = ""
 
         # If the technique is stacked queries (<stype>) do not put a space
         # after the prefix or it is in GROUP BY / ORDER BY (<clause>)
-        elif kb.technique == PAYLOAD.TECHNIQUE.STACKED:
-            query = kb.injection.prefix
-        elif kb.injection.clause == [2, 3] or kb.injection.clause == [2] or kb.injection.clause == [3]:
-            query = kb.injection.prefix
+        # elif kb.technique == PAYLOAD.TECHNIQUE.STACKED:
+        #     query = kb.injection.prefix
+        # elif kb.injection.clause == [2, 3] or kb.injection.clause == [2] or kb.injection.clause == [3]:
+        #     query = kb.injection.prefix
         elif clause == [2, 3] or clause == [2] or clause == [3]:
             query = prefix
 
         # In any other case prepend with the full prefix
         else:
-            query = kb.injection.prefix or prefix or ""
+            query =  prefix or ""
 
             if not (expression and expression[0] == ';') and not (query and query[-1] in ('(', ')') and expression and expression[0] in ('(', ')')) and not (query and query[-1] == '('):
                 query += " "
@@ -231,17 +231,17 @@ class Agent(object):
         SQL injection request
         """
 
-        if conf.direct:
-            return self.payloadDirect(expression)
+        # if conf.direct:
+        #     return self.payloadDirect(expression)
 
         expression = self.cleanupPayload(expression)
 
         # Take default values if None
-        suffix = kb.injection.suffix if kb.injection and suffix is None else suffix
+        # suffix = kb.injection.suffix if kb.injection and suffix is None else suffix
 
-        if kb.technique and kb.technique in kb.injection.data:
-            where = kb.injection.data[kb.technique].where if where is None else where
-            comment = kb.injection.data[kb.technique].comment if comment is None else comment
+        # if kb.technique and kb.technique in kb.injection.data:
+        #     where = kb.injection.data[kb.technique].where if where is None else where
+        #     comment = kb.injection.data[kb.technique].comment if comment is None else comment
 
         if Backend.getIdentifiedDbms() == DBMS.ACCESS and comment == GENERIC_SQL_COMMENT:
             comment = queries[DBMS.ACCESS].comment.query
